@@ -1,1 +1,17 @@
-
+{
+  "name": "tetris",
+  "version": "1.0.0",
+  "description": "Vue Tetris Clone",
+  "main": "index.js",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rgk/tetris.git"
+  },
+  "author": "rgk",
+  "homepage": "https://github.com/rgk/tetris",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "vue": "^3.2.33"
+  }
+}
