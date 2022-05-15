@@ -60,18 +60,17 @@ setInterval(() => {
   }
 
   if (!stop) {
-    let spot = (move < 1) ? 0 : 1;
     for (let i = 0; i < current.length; i++) {
       for (let j = 0; j < current[0].length; j++) {
         if (current[i][j] !== 2) continue;
 
-        if (tempGrid[i + 1][j + spot] === 1) {
+        if (tempGrid[i + 1][j] === 1) {
           stop = true;
           i = tempGrid.length;
           break;
         }
 
-        tempGrid[i + 1][j + spot] = 2;
+        tempGrid[i + 1][j] = 2;
       }
     }
   }
@@ -99,6 +98,7 @@ setInterval(() => {
         if (count === COLS) {
           grid.value = grid.value.splice(row, 1);
           grid.value.unshift(Array(10).fill(0));
+          break;
         }
       }
     }
