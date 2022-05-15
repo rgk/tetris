@@ -17,9 +17,16 @@ for (let i = 0; i < ROWS; i++) {
 
 let tempGrid = [];
 
+let current = false;
+let position = { x: 0, y: 0 };
 let move = 0;
+let turn = 0;
+let firstTurn = true;
 
 function mapShape(shape, x = 3, y = 0) {
+  current = shape;
+  position.x = x;
+  position.y = y;
   shape.forEach((row, i) => {
     row.forEach((column, j) => {
       grid.value[i + y][j + x] = (column) ? 2 : grid.value[i + y][j + x];
@@ -29,52 +36,87 @@ function mapShape(shape, x = 3, y = 0) {
 
 // Need data to be mutable.
 setInterval(() => {
-  let currentMove = move;
-  if (move) move = 0;
-  let start = 0;
   tempGrid = [];
   let stop = false;
 
-  let newPiece = true;
+  if (turn) current = rotate(current, turn);
 
-  for (let i = grid.value.length - 1; i >= 0; i--) {
+  for (let i = 0, row = position.y; row <= position.y + current.length; i++, row++) {
+    if (typeof grid.value[row] === 'undefined') {
+      stop = true;
+      break;
+    }
+
     tempGrid[i] = [];
-    for (let j = 0; j < grid.value[i].length; j++) {
-      if (
-        (typeof grid.value[i + 1] === 'undefined' || grid.value[i + 1][j + currentMove] === 1) &&
-        grid.value[i][j] === 2
-      ) {
-        i = start;
-        stop = true;
-        break;
-      } else if (grid.value[i][j] === 2) {
-        newPiece = false;
-        if (stop) {
-          tempGrid[i][j] = 1;
-          continue;
-        }
-        if (start === grid.value.length || !start) start = i;
-        if (j + currentMove < 0 || j + currentMove > 9 || i + 1 >= ROWS) {
-          currentMove = move;
-          i = start + 2;
-          start = grid.value.length;
-          break;
-        }
 
-        tempGrid[i + 1][j + currentMove] = 2;
+    for (let j = 0, column = position.x + move; column < position.x + current[0].length + move; j++, column++) {
+      if (typeof grid.value[row][column] === 'undefined') {
+        row = position.y - 1, i = -1, move = 0;
+        break;
       }
 
-      tempGrid[i][j] = (grid.value[i][j] < 2) ? grid.value[i][j] : 0;
+      tempGrid[i][j] = (grid.value[row][column] < 2) ? grid.value[row][column] : 0;
     }
   }
 
-  grid.value = tempGrid;
+  if (!stop) {
+    let spot = (move < 1) ? 0 : 1;
+    for (let i = 0; i < current.length; i++) {
+      for (let j = 0; j < current[0].length; j++) {
+        if (current[i][j] !== 2) continue;
 
-  if (newPiece) {
+        if (tempGrid[i + 1][j + spot] === 1) {
+          stop = true;
+          i = tempGrid.length;
+          break;
+        }
+
+        tempGrid[i + 1][j + spot] = 2;
+      }
+    }
+  }
+
+  if (!stop) {
+    for (let row = 0; row < grid.value.length; row++) {
+      for (let column = 0; column < grid.value[0].length; column++) {
+        if (grid.value[row][column] === 2) grid.value[row][column] = 0;
+      }
+    }
+
+    for (let i = 0, row = position.y; row <= position.y + current.length; i++, row++) {
+      for (let j = 0, column = position.x; column < position.x + current[0].length; j++, column++) {
+        if (tempGrid[i][j] === 2) grid.value[row][column] = 2;
+      }
+    }
+
+    position.y++;
+    position.x += move;
+  } else {
+    for (let row = 0; row < grid.value.length; row++) {
+      for (let column = 0, count = 0; column < grid.value[0].length; column++) {
+        if (grid.value[row][column] === 2) grid.value[row][column] = 1;
+        if (grid.value[row][column] === 1) count++;
+        if (count === COLS) {
+          grid.value = grid.value.splice(row, 1);
+          grid.value.unshift(Array(10).fill(0));
+        }
+      }
+    }
+  }
+
+  if (move) move = 0;
+  if (turn) turn = 0;
+
+  if (stop || firstTurn) {
+    if (firstTurn) firstTurn = false;
     let piece = shapes[Math.floor(Math.random() * shapes.length)];
 
     if (Math.random() >= 0.5) {
       piece = flipX(piece);
+    }
+
+    if (Math.random() >= 0.5) {
+      piece = rotate(piece, (Math.random() >= 0.5) ? 1 : -1);
     }
 
     mapShape(piece);
@@ -94,19 +136,25 @@ function flipX(shape) {
   return newShape;
 }
 
-function rotate(shape, direction = 'r') {
+function rotate(shape, direction = 0) {
   const newShape = [];
 
   for (let i = 0; i < shape[0].length; i++) {
     newShape.push([]);
   }
 
-  shape.forEach((row, i) => { // 2
+  shape.forEach((row, i) => {
     for (let j = row.length; j; j--) {
-      if (direction === 'r') {
-        newShape[j - 1][shape.length - i - 1] = row[j - 1];
-      } else {
-        newShape[row.length - j][i] = row[j - 1];
+      switch (direction) {
+        case -1:
+          newShape[j - 1][shape.length - i - 1] = row[j - 1];
+          break;
+        case 1:
+          newShape[row.length - j][i] = row[j - 1];
+          break;
+        default:
+          newShape = shape;
+          j = 1;
       }
     }
   });
@@ -128,10 +176,17 @@ const shapes = [
 </script>
 
 <template>
-  <button id="tetris" @keyup.left="move = -1" @keyup.right="move = 1">
-    <div v-for="row in grid">
-      <div v-for="value in row" style="display: inline-block">
-        {{ value }}
+  <button id="tetris"
+    @keyup.left="move = -1"
+    @keyup.right="move = 1"
+    @keyup.up="turn = 1"
+    @keyup.down="turn = -1"
+  >
+    <div v-for="row in grid" style="height: 16px;">
+      <div v-for="value in row" style="display: inline-block; height: 16px;">
+        <div style="background-color: green; height: 16px; width: 16px;" v-if="value == 2"></div>
+        <div style="background-color: blue; height: 16px; width: 16px;" v-if="value == 1"></div>
+        <div style="background-color: white; height: 16px; width: 16px;" v-if="value == 0"></div>
       </div>
     </div>
   </button>
