@@ -3,15 +3,30 @@ import { ref } from 'vue';
 
 // 0 = empty, 1 = permanent, 2 = moving
 
+const props = defineProps({
+  speed: {
+    type: Number,
+    default: 1000
+  },
+  COLS: {
+    type: Number,
+    default: 10
+  },
+  ROWS: {
+    type: Number,
+    default: 20
+  }
+});
+
 const COLS = 10;
 const ROWS = 20;
 
 const grid = ref([]);
 
 function emptyGrid(grid = []) {
-  for (let i = 0; i < ROWS; i++) {
+  for (let i = 0; i < props.ROWS; i++) {
     grid.push([]);
-    for (let j = 0; j < COLS; j++) {
+    for (let j = 0; j < props.COLS; j++) {
       grid[i][j] = 0;
     }
   }
@@ -22,15 +37,13 @@ function emptyGrid(grid = []) {
 // Create grid.
 grid.value = emptyGrid();
 
-let tempGrid = [];
-
 let current = false;
 let position = { x: 0, y: 0 };
 let move = 0;
 let turn = 0;
 let firstTurn = true;
 
-let score = 0;
+let score = ref(0);
 
 function mapShape(shape, x = 4, y = 0) {
   current = shape;
@@ -46,11 +59,12 @@ function mapShape(shape, x = 4, y = 0) {
 
 // Need data to be mutable.
 setInterval(() => {
-  tempGrid = [];
+  let tempGrid = [];
   let stop = false;
 
   if (turn) current = rotate(current, turn);
 
+  // Bounds
   for (let i = 0, row = position.y; row <= position.y + current.length; i++, row++) {
     if (typeof grid.value[row] === 'undefined') {
       stop = true;
@@ -105,10 +119,10 @@ setInterval(() => {
       for (let column = 0, count = 0; column < grid.value[0].length; column++) {
         if (grid.value[row][column] === 2) grid.value[row][column] = 1;
         if (grid.value[row][column] === 1) count++;
-        if (count !== COLS) continue;
+        if (count !== props.COLS) continue;
         grid.value.splice(row, 1);
         grid.value.unshift(Array(10).fill(0));
-        score++;
+        score.value++;
 
         break;
       }
@@ -132,7 +146,7 @@ setInterval(() => {
 
     mapShape(piece);
   }
-}, 1000);
+}, props.speed);
 
 function flipX(shape) {
   const newShape = [];
@@ -187,6 +201,7 @@ const shapes = [
 </script>
 
 <template>
+  <div>Score: {{ score }}</div>
   <button id="tetris"
     @keyup.left="move = -1"
     @keyup.right="move = 1"
