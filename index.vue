@@ -7,13 +7,20 @@ const COLS = 10;
 const ROWS = 20;
 
 const grid = ref([]);
-// Create grid.
-for (let i = 0; i < ROWS; i++) {
-  grid.value.push([]);
-  for (let j = 0; j < COLS; j++) {
-    grid.value[i][j] = 0;
+
+function emptyGrid(grid = []) {
+  for (let i = 0; i < ROWS; i++) {
+    grid.push([]);
+    for (let j = 0; j < COLS; j++) {
+      grid[i][j] = 0;
+    }
   }
+
+  return grid;
 }
+
+// Create grid.
+grid.value = emptyGrid();
 
 let tempGrid = [];
 
@@ -23,10 +30,13 @@ let move = 0;
 let turn = 0;
 let firstTurn = true;
 
-function mapShape(shape, x = 3, y = 0) {
+let score = 0;
+
+function mapShape(shape, x = 4, y = 0) {
   current = shape;
   position.x = x;
   position.y = y;
+
   shape.forEach((row, i) => {
     row.forEach((column, j) => {
       grid.value[i + y][j + x] = (column) ? 2 : grid.value[i + y][j + x];
@@ -95,11 +105,12 @@ setInterval(() => {
       for (let column = 0, count = 0; column < grid.value[0].length; column++) {
         if (grid.value[row][column] === 2) grid.value[row][column] = 1;
         if (grid.value[row][column] === 1) count++;
-        if (count === COLS) {
-          grid.value = grid.value.splice(row, 1);
-          grid.value.unshift(Array(10).fill(0));
-          break;
-        }
+        if (count !== COLS) continue;
+        grid.value.splice(row, 1);
+        grid.value.unshift(Array(10).fill(0));
+        score++;
+
+        break;
       }
     }
   }
