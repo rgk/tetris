@@ -1,7 +1,7 @@
 {
   "name": "tetris",
   "version": "1.0.0",
-  "description": "Vue Tetris Clone",
+  "description": "Vue 3 Component Tetris Clone",
   "main": "index.js",
   "type": "module",
   "repository": {
