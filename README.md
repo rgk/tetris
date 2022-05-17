@@ -1,2 +1,2 @@
 # tetris
-Tetris Clone with Vue 3
+Tetris Clone with Vue 3 as a Component
