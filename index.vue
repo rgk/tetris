@@ -18,10 +18,17 @@ const props = defineProps({
   }
 });
 
-const COLS = 10;
-const ROWS = 20;
-
-const grid = ref([]);
+const shapes = [
+  [[ 2, 2, 2, 2 ]],
+  [[ 2, 0, 0 ],
+    [ 2, 2, 2 ]], // flipX
+  [[ 2, 2 ],
+    [ 2, 2 ]],
+  [[ 0, 2, 2 ],
+    [ 2, 2, 0 ]], // flipX
+  [[ 2, 2, 2 ],
+    [ 0, 2, 0 ]]
+];
 
 function emptyGrid(grid = []) {
   for (let i = 0; i < props.ROWS; i++) {
@@ -34,19 +41,7 @@ function emptyGrid(grid = []) {
   return grid;
 }
 
-// Create grid.
-grid.value = emptyGrid();
-
-let current = false;
-let position = { x: 0, y: 0 };
-let move = 0;
-let turn = 0;
-let firstTurn = true;
-
-let score = ref(0);
-
 function mapShape(shape, x = 4, y = 0) {
-  current = shape;
   position.x = x;
   position.y = y;
 
@@ -55,98 +50,9 @@ function mapShape(shape, x = 4, y = 0) {
       grid.value[i + y][j + x] = (column) ? 2 : grid.value[i + y][j + x];
     });
   });
+
+  return shape;
 }
-
-// Need data to be mutable.
-setInterval(() => {
-  let tempGrid = [];
-  let stop = false;
-
-  if (turn) current = rotate(current, turn);
-
-  // Bounds
-  for (let i = 0, row = position.y; row <= position.y + current.length; i++, row++) {
-    if (typeof grid.value[row] === 'undefined') {
-      stop = true;
-      break;
-    }
-
-    tempGrid[i] = [];
-
-    for (let j = 0, column = position.x + move; column < position.x + current[0].length + move; j++, column++) {
-      if (typeof grid.value[row][column] === 'undefined') {
-        row = position.y - 1, i = -1, move = 0;
-        break;
-      }
-
-      tempGrid[i][j] = (grid.value[row][column] < 2) ? grid.value[row][column] : 0;
-    }
-  }
-
-  if (!stop) {
-    for (let i = 0; i < current.length; i++) {
-      for (let j = 0; j < current[0].length; j++) {
-        if (current[i][j] !== 2) continue;
-
-        if (tempGrid[i + 1][j] === 1) {
-          stop = true;
-          i = tempGrid.length;
-          break;
-        }
-
-        tempGrid[i + 1][j] = 2;
-      }
-    }
-  }
-
-  if (!stop) {
-    for (let row = 0; row < grid.value.length; row++) {
-      for (let column = 0; column < grid.value[0].length; column++) {
-        if (grid.value[row][column] === 2) grid.value[row][column] = 0;
-      }
-    }
-
-    for (let i = 0, row = position.y; row <= position.y + current.length; i++, row++) {
-      for (let j = 0, column = position.x; column < position.x + current[0].length; j++, column++) {
-        if (tempGrid[i][j] === 2) grid.value[row][column] = 2;
-      }
-    }
-
-    position.y++;
-    position.x += move;
-  } else {
-    for (let row = 0; row < grid.value.length; row++) {
-      for (let column = 0, count = 0; column < grid.value[0].length; column++) {
-        if (grid.value[row][column] === 2) grid.value[row][column] = 1;
-        if (grid.value[row][column] === 1) count++;
-        if (count !== props.COLS) continue;
-        grid.value.splice(row, 1);
-        grid.value.unshift(Array(10).fill(0));
-        score.value++;
-
-        break;
-      }
-    }
-  }
-
-  if (move) move = 0;
-  if (turn) turn = 0;
-
-  if (stop || firstTurn) {
-    if (firstTurn) firstTurn = false;
-    let piece = shapes[Math.floor(Math.random() * shapes.length)];
-
-    if (Math.random() >= 0.5) {
-      piece = flipX(piece);
-    }
-
-    if (Math.random() >= 0.5) {
-      piece = rotate(piece, (Math.random() >= 0.5) ? 1 : -1);
-    }
-
-    mapShape(piece);
-  }
-}, props.speed);
 
 function flipX(shape) {
   const newShape = [];
@@ -162,11 +68,12 @@ function flipX(shape) {
 }
 
 function rotate(shape, direction = 0) {
-  const newShape = [];
-
-  for (let i = 0; i < shape[0].length; i++) {
-    newShape.push([]);
+  let amount = shape.length;
+  if (direction) {
+    amount = shape[0].length;
   }
+
+  const newShape = Array(amount).fill([]);
 
   shape.forEach((row, i) => {
     for (let j = row.length; j; j--) {
@@ -178,8 +85,7 @@ function rotate(shape, direction = 0) {
           newShape[row.length - j][i] = row[j - 1];
           break;
         default:
-          newShape = shape;
-          j = 1;
+          newShape[i][j - 1] = row[j - 1];
       }
     }
   });
@@ -187,17 +93,131 @@ function rotate(shape, direction = 0) {
   return newShape;
 }
 
-const shapes = [
-  [[ 2, 2, 2, 2 ]],
-  [[ 2, 0, 0 ],
-    [ 2, 2, 2 ]], // flipX
-  [[ 2, 2 ],
-    [ 2, 2 ]],
-  [[ 0, 2, 2 ],
-    [ 2, 2, 0 ]], // flipX
-  [[ 2, 2, 2 ],
-    [ 0, 2, 0 ]]
-];
+// Create grid.
+const grid = ref(emptyGrid());
+
+let current = false;
+let position = { x: 0, y: 0 };
+let move = 0;
+let turn = 0;
+
+let score = ref(0);
+
+// Need data to be mutable.
+setInterval(() => {
+  let tempGrid = [];
+  let stop = false;
+
+  // Hold data to make it immutable.
+  let currentMove = move;
+  let currentTurn = turn;
+
+  // Reset moves every tick.
+  if (move) move = 0;
+  if (turn) turn = 0;
+
+  if (!current) {
+    current = shapes[Math.floor(Math.random() * shapes.length)];
+
+    if (Math.random() >= 0.5) {
+      current = flipX(current);
+    }
+
+    if (Math.random() >= 0.5) {
+      current = rotate(current, (Math.random() >= 0.5) ? 1 : -1);
+    }
+
+    current = mapShape(current);
+  }
+
+  let shape = rotate(current, currentTurn);
+
+  console.log(shape);
+  console.log(current);
+
+  Restart:
+  for (let i = 0, row = position.y + 1, restart = false; i < shape.length; i++, row++) {
+    // y bounds
+    if (typeof grid.value[row] === "undefined" || stop) {
+      if (currentTurn) {
+        currentTurn = 0;
+        shape = current;
+        continue Restart;
+      } else {
+        stop = true;
+        break;
+      }
+    }
+
+    tempGrid[i] = [];
+
+    for (let j = 0, column = position.x + currentMove; j < shape[0].length; j++, column++) {
+      // x bounds
+      if (typeof grid.value[row][column] === "undefined") {
+        currentMove = 0;
+        currentTurn = 0;
+        shape = current;
+        continue Restart;
+        break;
+      }
+
+      if (shape[i][j] !== 2) {
+        tempGrid[i][j] = grid.value[row][column];
+      } else {
+        if (grid.value[row][column] === 1) {
+          if (currentMove || currentTurn) {
+            currentMove = 0;
+            currentTurn = 0;
+            shape = current;
+            continue Restart;
+          } else {
+            stop = true;
+          }
+
+          break;
+        }
+
+        tempGrid[i][j] = shape[i][j];
+      }
+    }
+  }
+
+  if (!stop) {
+    // Clear the past moving values.
+    for (let row = position.y; row < position.y + current.length; row++) {
+      for (let column = position.x; column < position.x + current[0].length; column++) {
+        if (grid.value[row][column] === 2) grid.value[row][column] = 0;
+      }
+    }
+
+    current = shape;
+    position.x += currentMove;
+    position.y++;
+
+    // Place moved values.
+    for (let i = 0, row = position.y; row < position.y + current.length; i++, row++) {
+      for (let j = 0, column = position.x; column < position.x + current[0].length; j++, column++) {
+        if (tempGrid[i][j] === 2) grid.value[row][column] = 2;
+      }
+    }
+  } else {
+    for (let row = 0; row < grid.value.length; row++) {
+      for (let column = 0, count = 0; column < grid.value[0].length; column++) {
+        if (grid.value[row][column] === 2) grid.value[row][column] = 1;
+        if (grid.value[row][column] === 1) count++;
+        if (count !== props.COLS) continue;
+        grid.value.splice(row, 1);
+        grid.value.unshift(Array(10).fill(0));
+        score.value++;
+
+        break;
+      }
+    }
+
+    current = false;
+  }
+}, props.speed);
+
 </script>
 
 <template>
@@ -210,9 +230,9 @@ const shapes = [
   >
     <div v-for="row in grid" style="height: 16px;">
       <div v-for="value in row" style="display: inline-block; height: 16px;">
-        <div style="background-color: green; height: 16px; width: 16px;" v-if="value == 2"></div>
-        <div style="background-color: blue; height: 16px; width: 16px;" v-if="value == 1"></div>
-        <div style="background-color: white; height: 16px; width: 16px;" v-if="value == 0"></div>
+        <div style="background-color: green; height: 16px; width: 16px; border: 1px solid #CCC;" v-if="value == 2"></div>
+        <div style="background-color: blue; height: 16px; width: 16px; border: 1px solid #CCC;" v-if="value == 1"></div>
+        <div style="background-color: white; height: 16px; width: 16px; border: 1px solid #CCC;" v-if="value == 0"></div>
       </div>
     </div>
   </button>
