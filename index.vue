@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 
+// Grid Values:
 // 0 = empty, 1 = permanent, 2 = moving
 
 const props = defineProps({
@@ -102,7 +103,6 @@ let move = 0;
 let turn = 0;
 
 let score = ref(0);
-
 // Need data to be mutable.
 setInterval(() => {
   let tempGrid = [];
@@ -127,16 +127,13 @@ setInterval(() => {
       current = rotate(current, (Math.random() >= 0.5) ? 1 : -1);
     }
 
-    current = mapShape(current);
+    mapShape(current);
   }
 
-  let shape = rotate(current, currentTurn);
-
-  console.log(shape);
-  console.log(current);
+  let shape = rotate(current, 1);
 
   Restart:
-  for (let i = 0, row = position.y + 1, restart = false; i < shape.length; i++, row++) {
+  for (let i = 0, row = position.y + 1, restart = false, temp = []; i < shape.length; i++, row++) {
     // y bounds
     if (typeof grid.value[row] === "undefined" || stop) {
       if (currentTurn) {
@@ -149,7 +146,7 @@ setInterval(() => {
       }
     }
 
-    tempGrid[i] = [];
+    temp[i] = [];
 
     for (let j = 0, column = position.x + currentMove; j < shape[0].length; j++, column++) {
       // x bounds
@@ -162,7 +159,7 @@ setInterval(() => {
       }
 
       if (shape[i][j] !== 2) {
-        tempGrid[i][j] = grid.value[row][column];
+        temp[i][j] = grid.value[row][column];
       } else {
         if (grid.value[row][column] === 1) {
           if (currentMove || currentTurn) {
@@ -177,9 +174,11 @@ setInterval(() => {
           break;
         }
 
-        tempGrid[i][j] = shape[i][j];
+        temp[i][j] = shape[i][j];
       }
     }
+
+    tempGrid = temp;
   }
 
   if (!stop) {
@@ -205,6 +204,7 @@ setInterval(() => {
       for (let column = 0, count = 0; column < grid.value[0].length; column++) {
         if (grid.value[row][column] === 2) grid.value[row][column] = 1;
         if (grid.value[row][column] === 1) count++;
+
         if (count !== props.COLS) continue;
         grid.value.splice(row, 1);
         grid.value.unshift(Array(10).fill(0));
@@ -228,11 +228,11 @@ setInterval(() => {
     @keyup.up="turn = 1"
     @keyup.down="turn = -1"
   >
-    <div v-for="row in grid" style="height: 16px;">
-      <div v-for="value in row" style="display: inline-block; height: 16px;">
-        <div style="background-color: green; height: 16px; width: 16px; border: 1px solid #CCC;" v-if="value == 2"></div>
-        <div style="background-color: blue; height: 16px; width: 16px; border: 1px solid #CCC;" v-if="value == 1"></div>
-        <div style="background-color: white; height: 16px; width: 16px; border: 1px solid #CCC;" v-if="value == 0"></div>
+    <div v-for="row in grid" style="height: 16px; border: 1px solid #111;">
+      <div v-for="value in row" style="display: inline-block; height: 16px; border: 1px solid #CCC;">
+        <div style="background-color: green; height: 13px; width: 13px;" v-if="value == 2"></div>
+        <div style="background-color: blue; height: 13px; width: 13px;" v-if="value == 1"></div>
+        <div style="background-color: white; height: 13px; width: 13px;" v-if="value == 0"></div>
       </div>
     </div>
   </button>
