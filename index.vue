@@ -142,7 +142,7 @@ setInterval(() => {
 
     for (let j = 0, column = position.x + currentMove; j < shape[0].length; j++, column++) {
       // x bounds
-      if (typeof grid.value[row][column] === "undefined" || restart) {
+      if (restart || typeof grid.value[row][column] === "undefined") {
         restart = true;
         break;
       }
