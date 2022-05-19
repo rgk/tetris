@@ -7,7 +7,7 @@ import { ref } from 'vue';
 const props = defineProps({
   speed: {
     type: Number,
-    default: 1000
+    default: 600
   },
   COLS: {
     type: Number,
@@ -70,6 +70,7 @@ function flipX(shape) {
 }
 
 function rotate(shape, direction = 0) {
+  // Do not use Array.fill for arrays.
   const newShape = Array.from(
     { length: (direction) ? shape[0].length : shape.length },
     () => []
@@ -96,7 +97,8 @@ let position = { x: 0, y: 0 };
 let move = 0;
 let turn = 0;
 
-let score = ref(0);
+const score = ref(0);
+const lastScore = ref(0);
 
 // Need data to be mutable.
 setInterval(() => {
@@ -196,6 +198,13 @@ setInterval(() => {
       }
     }
   } else {
+    if (!position.y) {
+      grid.value = emptyGrid();
+      lastScore.value = score.value;
+      score.value = 0;
+      return;
+    }
+
     for (let row = 0; row < grid.value.length; row++) {
       for (let column = 0, count = 0; column < grid.value[0].length; column++) {
         if (grid.value[row][column] === 2) grid.value[row][column] = 1;
@@ -218,6 +227,7 @@ setInterval(() => {
 </script>
 
 <template>
+  <div>Last Score: {{ lastScore }}</div>
   <div>Score: {{ score }}</div>
   <button id="tetris"
     @keyup.left="move = -1"
