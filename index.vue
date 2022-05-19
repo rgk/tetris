@@ -69,27 +69,20 @@ function flipX(shape) {
 }
 
 function rotate(shape, direction = 0) {
-  let amount = shape.length;
-  if (direction) {
-    amount = shape[0].length;
-  }
+  const newShape = Array.from(
+    { length: (direction) ? shape[0].length : shape.length },
+    () => []
+  );
 
-  const newShape = Array(amount).fill([]);
-
-  shape.forEach((row, i) => {
-    for (let j = row.length; j; j--) {
-      switch (direction) {
-        case -1:
-          newShape[j - 1][shape.length - i - 1] = row[j - 1];
-          break;
-        case 1:
-          newShape[row.length - j][i] = row[j - 1];
-          break;
-        default:
-          newShape[i][j - 1] = row[j - 1];
+  for (let i = 0; i < shape.length; i++) {
+    for (let j = 0; j < shape[i].length; j++) {
+      if (direction) {
+        newShape[j][i] = (direction === 1) ? shape[i][shape[i].length - j - 1] : shape[shape.length - i - 1][j];
+      } else {
+        newShape[i][j] = shape[i][j];
       }
     }
-  });
+  }
 
   return newShape;
 }
