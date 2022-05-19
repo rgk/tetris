@@ -57,10 +57,11 @@ function mapShape(shape, x = 4, y = 0) {
 
 function flipX(shape) {
   const newShape = [];
+
   shape.forEach((row) => {
     const part = [];
     for (let i = row.length; i; i--) {
-      part.push(row[i-1]);
+      part.push(row[i - 1]);
     }
     newShape.push(part);
   });
@@ -96,6 +97,7 @@ let move = 0;
 let turn = 0;
 
 let score = ref(0);
+
 // Need data to be mutable.
 setInterval(() => {
   let tempGrid = [];
@@ -123,16 +125,13 @@ setInterval(() => {
     mapShape(current);
   }
 
-  let shape = rotate(current, 1);
+  let shape = rotate(current, currentTurn);
 
-  Restart:
-  for (let i = 0, row = position.y + 1, restart = false, temp = []; i < shape.length; i++, row++) {
+  for (let i = 0, row = position.y + 1, temp = [], restart = false; i < shape.length; i++, row++) {
     // y bounds
     if (typeof grid.value[row] === "undefined" || stop) {
-      if (currentTurn) {
-        currentTurn = 0;
-        shape = current;
-        continue Restart;
+      if (currentMove || currentTurn) {
+        restart = true;
       } else {
         stop = true;
         break;
@@ -143,27 +142,20 @@ setInterval(() => {
 
     for (let j = 0, column = position.x + currentMove; j < shape[0].length; j++, column++) {
       // x bounds
-      if (typeof grid.value[row][column] === "undefined") {
-        currentMove = 0;
-        currentTurn = 0;
-        shape = current;
-        continue Restart;
+      if (typeof grid.value[row][column] === "undefined" || restart) {
+        restart = true;
         break;
       }
 
       if (shape[i][j] !== 2) {
-        temp[i][j] = grid.value[row][column];
+        temp[i][j] = (grid.value[row][column] === 2) ? 0 : grid.value[row][column];
       } else {
         if (grid.value[row][column] === 1) {
           if (currentMove || currentTurn) {
-            currentMove = 0;
-            currentTurn = 0;
-            shape = current;
-            continue Restart;
+            restart = true;
           } else {
             stop = true;
           }
-
           break;
         }
 
@@ -171,7 +163,18 @@ setInterval(() => {
       }
     }
 
-    tempGrid = temp;
+    // TODO: Cleaner way to restart this logic.
+    if (restart) {
+      restart = false;
+      currentMove = 0;
+      currentTurn = 0;
+      shape = rotate(current);
+      i = -1;
+      temp = [];
+      row = position.y;
+    } else {
+      tempGrid = temp;
+    }
   }
 
   if (!stop) {
@@ -182,7 +185,7 @@ setInterval(() => {
       }
     }
 
-    current = shape;
+    current = rotate(shape);
     position.x += currentMove;
     position.y++;
 
@@ -200,13 +203,14 @@ setInterval(() => {
 
         if (count !== props.COLS) continue;
         grid.value.splice(row, 1);
-        grid.value.unshift(Array(10).fill(0));
+        grid.value.unshift(Array(props.COLS).fill(0));
         score.value++;
 
         break;
       }
     }
 
+    // Trigger new piece drop.
     current = false;
   }
 }, props.speed);
