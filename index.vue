@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 
 // Grid Values:
 // 0 = empty, 1 = permanent, 2 = moving
@@ -7,7 +7,7 @@ import { ref } from 'vue';
 const props = defineProps({
   speed: {
     type: Number,
-    default: 600
+    default: 500
   },
   COLS: {
     type: Number,
@@ -18,6 +18,29 @@ const props = defineProps({
     default: 20
   }
 });
+
+const startShape = [
+  [ 2, 2, 2, 2 ],
+  [ 2, 0, 0, 0 ],
+  [ 2, 2, 2, 2 ],
+  [ 0, 0, 0, 2 ],
+  [ 2, 2, 2, 2 ],
+  [ 0, 0, 0, 0 ],
+  [ 2, 2, 2, 2 ],
+  [ 0, 2, 0, 0 ],
+  [ 0, 2, 0, 0 ],
+  [ 0, 2, 0, 0 ],
+  [ 0, 0, 0, 0 ],
+  [ 2, 2, 2, 0 ],
+  [ 2, 0, 0, 2 ],
+  [ 2, 2, 2, 0 ],
+  [ 2, 0, 0, 2 ],
+  [ 0, 0, 0, 0 ],
+  [ 2, 2, 2, 2 ],
+  [ 0, 2, 0, 0 ],
+  [ 0, 2, 0, 0 ],
+  [ 0, 2, 0, 0 ]
+]
 
 const shapes = [
   [[ 2, 2, 2, 2 ]],
@@ -31,7 +54,7 @@ const shapes = [
     [ 0, 2, 0 ]]
 ];
 
-function mapShape(shape, x = 4, y = 0) {
+function mapShape(shape, x = 3, y = 0) {
   position.x = x;
   position.y = y;
 
@@ -92,12 +115,18 @@ function rotate(shape, direction = 0) {
 // Create grid.
 const grid = ref(emptyGrid());
 
+// Need DOM.
+onMounted(() => {
+  mapShape(startShape);
+});
+
 let loop = false;
 
 let current = false;
 let position = { x: 0, y: 0 };
 let move = 0;
 let turn = 0;
+let fast = 0;
 
 const score = ref(0);
 const lastScore = ref(0);
@@ -228,8 +257,9 @@ function logic() {
   start();
 }
 
-function start() {
-  if (!loop) return loop = setTimeout(logic, props.speed);
+function start(first = false) {
+  if (first) grid.value = emptyGrid();
+  if (!loop) return loop = setTimeout(logic, props.speed / ( 1 + fast ));
   return false;
 }
 
@@ -242,8 +272,9 @@ function start() {
     @keyup.left="move = -1"
     @keyup.right="move = 1"
     @keyup.up="turn = 1"
-    @keyup.down="turn = -1"
-    @click="start"
+    @keydown.down="fast = 1"
+    @keyup.down="fast = 0"
+    @click="start(true)"
   >
     <div v-for="row in grid" style="height: 16px; border: 1px solid #111;">
       <div v-for="value in row" style="display: inline-block; height: 16px; border: 1px solid #CCC;">
