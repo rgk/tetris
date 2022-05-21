@@ -31,17 +31,6 @@ const shapes = [
     [ 0, 2, 0 ]]
 ];
 
-function emptyGrid(grid = []) {
-  for (let i = 0; i < props.ROWS; i++) {
-    grid.push([]);
-    for (let j = 0; j < props.COLS; j++) {
-      grid[i][j] = 0;
-    }
-  }
-
-  return grid;
-}
-
 function mapShape(shape, x = 4, y = 0) {
   position.x = x;
   position.y = y;
@@ -53,6 +42,17 @@ function mapShape(shape, x = 4, y = 0) {
   });
 
   return shape;
+}
+
+function emptyGrid(grid = []) {
+  for (let i = 0; i < props.ROWS; i++) {
+    grid.push([]);
+    for (let j = 0; j < props.COLS; j++) {
+      grid[i][j] = 0;
+    }
+  }
+
+  return grid;
 }
 
 function flipX(shape) {
@@ -92,6 +92,8 @@ function rotate(shape, direction = 0) {
 // Create grid.
 const grid = ref(emptyGrid());
 
+let loop = false;
+
 let current = false;
 let position = { x: 0, y: 0 };
 let move = 0;
@@ -100,10 +102,9 @@ let turn = 0;
 const score = ref(0);
 const lastScore = ref(0);
 
-// Need data to be mutable.
-setInterval(() => {
+function logic() {
   let tempGrid = [];
-  let stop = false;
+  let stop = null;
 
   // Hold data to make it immutable.
   let currentMove = move;
@@ -222,7 +223,15 @@ setInterval(() => {
     // Trigger new piece drop.
     current = false;
   }
-}, props.speed);
+
+  loop = null;
+  start();
+}
+
+function start() {
+  if (!loop) return loop = setTimeout(logic, props.speed);
+  return false;
+}
 
 </script>
 
@@ -234,6 +243,7 @@ setInterval(() => {
     @keyup.right="move = 1"
     @keyup.up="turn = 1"
     @keyup.down="turn = -1"
+    @click="start"
   >
     <div v-for="row in grid" style="height: 16px; border: 1px solid #111;">
       <div v-for="value in row" style="display: inline-block; height: 16px; border: 1px solid #CCC;">
