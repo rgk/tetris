@@ -12,6 +12,6 @@
   "homepage": "https://github.com/rgk/tetris",
   "license": "GPL-3.0-or-later",
   "dependencies": {
-    "vue": "^3.2.34"
+    "vue": "^3.2.36"
   }
 }
