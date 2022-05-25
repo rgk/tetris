@@ -258,7 +258,11 @@ function logic() {
 }
 
 function start(first = false) {
-  if (first) grid.value = emptyGrid();
+  if (first) {
+    grid.value = emptyGrid();
+    current = false;
+  }
+
   if (!loop) return loop = setTimeout(logic, props.speed / ( 1 + fast ));
   return false;
 }
