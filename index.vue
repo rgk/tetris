@@ -78,33 +78,31 @@ function emptyGrid(grid = []) {
   return grid;
 }
 
-function flipX(shape) {
-  const newShape = [];
+function transform(shape, direction = 0, flipX = false) {
+  let newShape = [];
 
-  shape.forEach((row) => {
-    const part = [];
-    for (let i = row.length; i; i--) {
-      part.push(row[i - 1]);
-    }
-    newShape.push(part);
-  });
+  if (flipX) {
+    shape.forEach((row) => {
+      const part = [];
+      for (let i = row.length; i; i--) {
+        part.push(row[i - 1]);
+      }
+      newShape.push(part);
+    });
+  } else {
+    // Do not use Array.fill for arrays.
+    newShape = Array.from(
+      { length: (direction) ? shape[0].length : shape.length },
+      () => []
+    );
 
-  return newShape;
-}
-
-function rotate(shape, direction = 0) {
-  // Do not use Array.fill for arrays.
-  const newShape = Array.from(
-    { length: (direction) ? shape[0].length : shape.length },
-    () => []
-  );
-
-  for (let i = 0; i < shape.length; i++) {
-    for (let j = 0; j < shape[i].length; j++) {
-      if (direction) {
-        newShape[j][i] = (direction === 1) ? shape[i][shape[i].length - j - 1] : shape[shape.length - i - 1][j];
-      } else {
-        newShape[i][j] = shape[i][j];
+    for (let i = 0; i < shape.length; i++) {
+      for (let j = 0; j < shape[i].length; j++) {
+        if (direction) {
+          newShape[j][i] = (direction === 1) ? shape[i][shape[i].length - j - 1] : shape[shape.length - i - 1][j];
+        } else {
+          newShape[i][j] = shape[i][j];
+        }
       }
     }
   }
@@ -147,17 +145,13 @@ function logic() {
     current = shapes[Math.floor(Math.random() * shapes.length)];
 
     if (Math.random() >= 0.5) {
-      current = flipX(current);
-    }
-
-    if (Math.random() >= 0.5) {
-      current = rotate(current, (Math.random() >= 0.5) ? 1 : -1);
+      current = transform(current, (Math.random() >= 0.5) ? 1 : -1, (Math.random() <= 0.5) ? true : false);
     }
 
     mapShape(current);
   }
 
-  let shape = rotate(current, currentTurn);
+  let shape = transform(current, currentTurn);
 
   for (let i = 0, row = position.y + 1, temp = [], restart = false; i < shape.length; i++, row++) {
     // y bounds
@@ -200,7 +194,7 @@ function logic() {
       restart = false;
       currentMove = 0;
       currentTurn = 0;
-      shape = rotate(current);
+      shape = transform(current);
       i = -1;
       temp = [];
       row = position.y;
@@ -217,7 +211,7 @@ function logic() {
       }
     }
 
-    current = rotate(shape);
+    current = transform(shape);
     position.x += currentMove;
     position.y++;
 
@@ -280,6 +274,7 @@ function start(first = false) {
     @keyup.down="fast = 0"
     @click="start(true)"
   >
+    <span>Best: {{ lastScore }} | Score: {{ score }}</span>
     <div v-for="row in grid" style="height: 16px; border: 1px solid #111;">
       <div v-for="value in row" style="display: inline-block; height: 16px; border: 1px solid #CCC;">
         <div style="background-color: green; height: 13px; width: 13px;" v-if="value == 2"></div>
