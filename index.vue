@@ -282,5 +282,8 @@ function start(first = false) {
         <div style="background-color: white; height: 13px; width: 13px;" v-if="value == 0"></div>
       </div>
     </div>
+    <button @click="move = -1">Left</button>
+    <button @click="move = 1">Right</button>
+    <button @click="turn = 1">Turn</button>
   </button>
 </template>
