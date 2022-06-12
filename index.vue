@@ -134,8 +134,7 @@ function logic() {
   let stop = null;
 
   // Hold data to make it immutable.
-  let currentMove = move;
-  let currentTurn = turn;
+  const currentMove = [ move, turn ];
 
   // Reset moves every tick.
   if (move) move = 0;
@@ -151,12 +150,12 @@ function logic() {
     mapShape(current);
   }
 
-  let shape = transform(current, currentTurn);
+  let shape = transform(current, currentMove[0]);
 
   for (let i = 0, row = position.y + 1, temp = [], restart = false; i < shape.length; i++, row++) {
     // y bounds
     if (typeof grid.value[row] === "undefined" || stop) {
-      if (currentMove || currentTurn) {
+      if (currentMove[0] || currentMove[1]) {
         restart = true;
       } else {
         stop = true;
@@ -166,7 +165,7 @@ function logic() {
 
     temp[i] = [];
 
-    for (let j = 0, column = position.x + currentMove; j < shape[0].length; j++, column++) {
+    for (let j = 0, column = position.x + currentMove[0]; j < shape[0].length; j++, column++) {
       // x bounds
       if (restart || typeof grid.value[row][column] === "undefined") {
         restart = true;
@@ -177,7 +176,7 @@ function logic() {
         temp[i][j] = (grid.value[row][column] === 2) ? 0 : grid.value[row][column];
       } else {
         if (grid.value[row][column] === 1) {
-          if (currentMove || currentTurn) {
+          if (currentMove[0] || currentMove[1]) {
             restart = true;
           } else {
             stop = true;
@@ -192,8 +191,8 @@ function logic() {
     // TODO: Cleaner way to restart this logic.
     if (restart) {
       restart = false;
-      currentMove = 0;
-      currentTurn = 0;
+      currentMove[0] = 0;
+      currentMove[1] = 0;
       shape = transform(current);
       i = -1;
       temp = [];
@@ -212,7 +211,7 @@ function logic() {
     }
 
     current = transform(shape);
-    position.x += currentMove;
+    position.x += currentMove[0];
     position.y++;
 
     // Place moved values.
