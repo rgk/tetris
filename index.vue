@@ -126,8 +126,7 @@ let move = 0;
 let turn = 0;
 let fast = 0;
 
-const score = ref(0);
-const lastScore = ref(0);
+const score = ref([0]);
 
 function logic() {
   let tempGrid = [];
@@ -223,8 +222,8 @@ function logic() {
   } else {
     if (!position.y) {
       grid.value = emptyGrid();
-      lastScore.value = score.value;
-      score.value = 0;
+      score.value.push(score.value[0]);
+      score.value[0] = 0;
       return;
     }
 
@@ -236,7 +235,7 @@ function logic() {
         if (count !== props.COLS) continue;
         grid.value.splice(row, 1);
         grid.value.unshift(Array(props.COLS).fill(0));
-        score.value++;
+        score.value[0]++;
 
         break;
       }
@@ -263,8 +262,6 @@ function start(first = false) {
 </script>
 
 <template>
-  <div>Last Score: {{ lastScore }}</div>
-  <div>Score: {{ score }}</div>
   <button id="tetris"
     @keyup.left="move = -1"
     @keyup.right="move = 1"
@@ -273,7 +270,7 @@ function start(first = false) {
     @keyup.down="fast = 0"
     @click="start(true)"
   >
-    <span>Best: {{ lastScore }} | Score: {{ score }}</span>
+    <span>Best: {{ Math.max(..score) }} | Score: {{ score[0] }}</span>
     <div v-for="row in grid" style="height: 16px; border: 1px solid #111;">
       <div v-for="value in row" style="display: inline-block; height: 16px; border: 1px solid #CCC;">
         <div style="background-color: green; height: 13px; width: 13px;" v-if="value == 2"></div>
