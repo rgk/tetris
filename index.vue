@@ -122,8 +122,11 @@ let loop = false;
 
 let current = false;
 let position = { x: 0, y: 0 };
-let move = 0;
-let turn = 0;
+const input = [
+  0, // move
+  0 // turn
+];
+
 let fast = 0;
 
 const score = ref([0]);
@@ -133,11 +136,11 @@ function logic() {
   let stop = null;
 
   // Hold data to make it immutable.
-  const currentMove = [ move, turn ];
+  const currentInput = [ input[0], input[1] ];
 
   // Reset moves every tick.
-  if (move) move = 0;
-  if (turn) turn = 0;
+  if (input[0]) input[0] = 0;
+  if (input[1]) input[1] = 0;
 
   if (!current) {
     current = shapes[Math.floor(Math.random() * shapes.length)];
@@ -263,11 +266,11 @@ function start(first = false) {
 
 <template>
   <button id="tetris"
-    @keyup.left="move = -1"
-    @keyup.right="move = 1"
-    @keyup.up="turn = 1"
-    @keydown.down="fast = 1"
-    @keyup.down="fast = 0"
+    @keyup.left="input[0] = -1"
+    @keyup.right="input[0] = 1"
+    @keyup.up="input[1] = 1"
+    @keydown.down="input[2] = 1"
+    @keyup.down="input[2] = 0"
     @click="start(true)"
   >
     <span>Best: {{ Math.max(..score) }} | Score: {{ score[0] }}</span>
@@ -279,9 +282,9 @@ function start(first = false) {
       </div>
     </div>
     <div>
-      <button class="display: inline-block" @click="move = -1">Left</button>
-      <button class="display: inline-block" @click="move = 1">Right</button>
-      <button class="display: inline-block" @click="turn = 1">Turn</button>
+      <button class="display: inline-block" @click="input[0] = -1">Left</button>
+      <button class="display: inline-block" @click="input[0] = 1">Right</button>
+      <button class="display: inline-block" @click="input[1] = 1">Turn</button>
     </div>
   </button>
 </template>
