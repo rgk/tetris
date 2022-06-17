@@ -16,7 +16,10 @@ const props = defineProps({
   ROWS: {
     type: Number,
     default: 20
-  }
+  },
+  colors: {
+    type: Array,
+    default: [ 'white', 'blue', 'green' ]
 });
 
 const startShape = [
@@ -276,9 +279,9 @@ function start(first = false) {
     <span>Best: {{ Math.max(..score) }} | Score: {{ score[0] }}</span>
     <div v-for="row in grid" style="height: 16px; border: 1px solid #111;">
       <div v-for="value in row" style="display: inline-block; height: 16px; border: 1px solid #CCC;">
-        <div style="background-color: green; height: 13px; width: 13px;" v-if="value == 2"></div>
-        <div style="background-color: blue; height: 13px; width: 13px;" v-if="value == 1"></div>
-        <div style="background-color: white; height: 13px; width: 13px;" v-if="value == 0"></div>
+        <div style="background-color: {{ colors[2] }}; height: 13px; width: 13px;" v-if="value == 2"></div>
+        <div style="background-color: {{ colors[1] }}; height: 13px; width: 13px;" v-if="value == 1"></div>
+        <div style="background-color: {{ colors[0] }}; height: 13px; width: 13px;" v-if="value == 0"></div>
       </div>
     </div>
     <div>
