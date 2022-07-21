@@ -58,8 +58,7 @@ const shapes = [
 ];
 
 function mapShape(shape, x = 3, y = 0) {
-  position.x = x;
-  position.y = y;
+  position = { x: x, y: y };
 
   shape.forEach((row, i) => {
     row.forEach((column, j) => {
@@ -73,9 +72,7 @@ function mapShape(shape, x = 3, y = 0) {
 function emptyGrid(grid = []) {
   for (let i = 0; i < props.ROWS; i++) {
     grid.push([]);
-    for (let j = 0; j < props.COLS; j++) {
-      grid[i][j] = 0;
-    }
+    for (let j = 0; j < props.COLS; j++) grid[i][j] = 0;
   }
 
   return grid;
@@ -87,9 +84,8 @@ function transform(shape, direction = 0, flipX = false) {
   if (flipX) {
     shape.forEach((row) => {
       const part = [];
-      for (let i = row.length; i; i--) {
-        part.push(row[i - 1]);
-      }
+      for (let i = row.length; i; i--) part.push(row[i - 1]);
+
       newShape.push(part);
     });
   } else {
