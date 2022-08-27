@@ -137,9 +137,8 @@ function logic() {
   // Hold data to make it immutable.
   const currentInput = [ input[0], input[1] ];
 
-  // Reset moves every tick.
-  if (input[0]) input[0] = 0;
-  if (input[1]) input[1] = 0;
+  // Reset moves every tick.  
+  for (let i = 0; i < 2; i++) if (input[i]) input[i] = 0;
 
   if (!current) {
     current = shapes[Math.floor(Math.random() * shapes.length)];
