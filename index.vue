@@ -61,9 +61,7 @@ function mapShape(shape, x = 3, y = 0) {
   position = { x: x, y: y };
 
   shape.forEach((row, i) => {
-    row.forEach((column, j) => {
-      grid.value[i + y][j + x] = (column) ? 2 : grid.value[i + y][j + x];
-    });
+    row.forEach((column, j) => grid.value[i + y][j + x] = (column) ? 2 : grid.value[i + y][j + x]);
   });
 
   return shape;
@@ -113,9 +111,7 @@ function transform(shape, direction = 0, flipX = false) {
 const grid = ref(emptyGrid());
 
 // Need DOM.
-onMounted(() => {
-  mapShape(startShape);
-});
+onMounted(() => mapShape(startShape));
 
 let loop = false;
 
