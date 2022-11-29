@@ -68,10 +68,7 @@ function mapShape(shape, x = 3, y = 0) {
 }
 
 function emptyGrid(grid = []) {
-  for (let i = 0; i < props.ROWS; i++) {
-    grid.push([]);
-    for (let j = 0; j < props.COLS; j++) grid[i][j] = 0;
-  }
+  for (let i = 0; i < props.ROWS; i++) grid[i].fill(0);
 
   return grid;
 }
