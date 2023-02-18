@@ -239,8 +239,7 @@ function logic() {
     current = false;
   }
 
-  loop = null;
-  start();
+  loop = start();
 }
 
 function start(first = false) {
@@ -249,8 +248,8 @@ function start(first = false) {
     current = false;
   }
 
-  if (!loop) return loop = setTimeout(logic, props.speed / ( 1 + fast ));
-  return false;
+  if (!loop) return setTimeout(logic, props.speed / ( 1 + fast ));
+  return null;
 }
 
 </script>
