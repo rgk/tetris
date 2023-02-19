@@ -110,7 +110,7 @@ const grid = ref(emptyGrid());
 // Need DOM.
 onMounted(() => mapShape(startShape));
 
-let loop = false;
+let loop = null;
 
 let current = false;
 let position = { x: 0, y: 0 };
@@ -150,10 +150,11 @@ function logic() {
     if (typeof grid.value[row] === "undefined" || stop) {
       if (currentMove[0] || currentMove[1]) {
         restart = true;
-      } else {
-        stop = true;
-        break;
+        continue;
       }
+
+      stop = true;
+      break;
     }
 
     temp[i] = [];
