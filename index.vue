@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue';
 
 // Grid Values:
-// 0 = empty, 1 = permanent, 2 = moving
+// 0 = empty, 1 = stopped, 2 = moving
 
 const props = defineProps({
   speed: {
@@ -48,21 +48,19 @@ const startShape = [
 const shapes = [
   [[ 2, 2, 2, 2 ]],
   [[ 2, 0, 0 ],
-    [ 2, 2, 2 ]], // flipX
+   [ 2, 2, 2 ]], // flipX
   [[ 2, 2 ],
-    [ 2, 2 ]],
+   [ 2, 2 ]],
   [[ 0, 2, 2 ],
-    [ 2, 2, 0 ]], // flipX
+   [ 2, 2, 0 ]], // flipX
   [[ 2, 2, 2 ],
-    [ 0, 2, 0 ]]
+   [ 0, 2, 0 ]]
 ];
 
 function mapShape(shape, x = 3, y = 0) {
   position = { x: x, y: y };
 
-  shape.forEach((row, i) => {
-    row.forEach((column, j) => grid.value[i + y][j + x] = (column) ? 2 : grid.value[i + y][j + x]);
-  });
+  shape.forEach((row, i) => row.forEach((column, j) => grid.value[i + y][j + x] = (column) ? 2 : grid.value[i + y][j + x]));
 
   return shape;
 }
