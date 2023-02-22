@@ -22,6 +22,16 @@ const props = defineProps({
     default: [ 'white', 'blue', 'green' ]
 });
 
+let loop = null;
+
+let current = false;
+let position = { x: 0, y: 0 };
+const input = [
+  0, // move
+  0 // turn
+];
+let fast = 0;
+
 const startShape = [
   [ 2, 2, 2, 2 ],
   [ 2, 0, 0, 0 ],
@@ -107,17 +117,6 @@ const grid = ref(emptyGrid());
 
 // Need DOM.
 onMounted(() => mapShape(startShape));
-
-let loop = null;
-
-let current = false;
-let position = { x: 0, y: 0 };
-const input = [
-  0, // move
-  0 // turn
-];
-
-let fast = 0;
 
 const score = ref([0]);
 
