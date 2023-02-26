@@ -20,6 +20,7 @@ const props = defineProps({
   colors: {
     type: Array,
     default: [ 'white', 'blue', 'green' ]
+  }
 });
 
 let loop = null;
