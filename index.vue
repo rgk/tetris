@@ -247,8 +247,7 @@ function start(first = false) {
     current = false;
   }
 
-  if (!loop) return setTimeout(logic, props.speed / ( 1 + fast ));
-  return null;
+  return loop ? null : setTimeout(logic, props.speed / ( 1 + fast ));
 }
 
 </script>
