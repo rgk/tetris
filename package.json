@@ -1,4 +1,5 @@
 {
+  "private": true,
   "name": "tetris",
   "version": "1.0.0",
   "description": "Vue 3 Component Tetris Clone",
